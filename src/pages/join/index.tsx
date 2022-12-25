@@ -18,7 +18,7 @@ const Join: CustomNextPage = () => {
 
         <form className="m-4 sm:m-6">
           <div className="flex gap-4">
-            <label className="flex-1 text-gray-600 dark:text-zinc-300">
+            <label className="flex-1 text-slate-600 dark:text-zinc-300">
               First Name
               <input
                 type="text"
@@ -26,7 +26,7 @@ const Join: CustomNextPage = () => {
                 placeholder="John"
               />
             </label>
-            <label className="flex-1 text-gray-600 dark:text-zinc-300">
+            <label className="flex-1 text-slate-600 dark:text-zinc-300">
               Last Name
               <input
                 type="text"
@@ -36,7 +36,7 @@ const Join: CustomNextPage = () => {
             </label>
           </div>
 
-          <label className="mt-4 block text-gray-600 dark:text-zinc-300">
+          <label className="mt-4 block text-slate-600 dark:text-zinc-300">
             Email
             <input
               type="email"

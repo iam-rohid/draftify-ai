@@ -1,19 +1,25 @@
 import UserDropdown from "@/components/UserDropdown";
 import { useAuth } from "@/providers/AuthProvider";
+import clsx from "clsx";
 import { User } from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FC, PropsWithChildren, ReactNode, useMemo } from "react";
+import { FC, PropsWithChildren, ReactNode, useMemo, useState } from "react";
 import {
-  HiHome,
-  HiSquares2X2,
-  HiPlus,
-  HiCube,
-  HiTrash,
-  HiBars3,
+  HiOutlinePlus,
+  HiOutlineBars3,
+  HiOutlineCube,
+  HiOutlineHome,
+  HiOutlineSquares2X2,
+  HiOutlineTrash,
 } from "react-icons/hi2";
 
-const DashboardLayout: FC<PropsWithChildren> = ({ children }) => {
+const DashboardLayout: FC<
+  PropsWithChildren<{
+    compactSidebar?: boolean;
+  }>
+> = ({ children, compactSidebar = false }) => {
+  const [isCompactSidebar, setIsCompactSidebar] = useState(compactSidebar);
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const mainMenu = useMemo(
@@ -22,25 +28,25 @@ const DashboardLayout: FC<PropsWithChildren> = ({ children }) => {
         id: "dashboard",
         name: "Dashboard",
         href: "/dashboard",
-        icon: <HiHome />,
+        icon: <HiOutlineHome />,
       },
       {
         id: "templates",
         name: "Templates",
         href: "/dashboard/templates",
-        icon: <HiSquares2X2 />,
+        icon: <HiOutlineSquares2X2 />,
       },
       {
         id: "playground",
         name: "Playground",
         href: "/dashboard/playground",
-        icon: <HiCube />,
+        icon: <HiOutlineCube />,
       },
       {
         id: "trash",
         name: "Trash",
         href: "/dashboard/trash",
-        icon: <HiTrash />,
+        icon: <HiOutlineTrash />,
       },
     ],
     []
@@ -58,8 +64,12 @@ const DashboardLayout: FC<PropsWithChildren> = ({ children }) => {
   return (
     <>
       <Header user={user} />
-      <Sidebar menu={mainMenu} />
-      <main className="ml-64 mt-14">{children}</main>
+      <Sidebar menu={mainMenu} compact={isCompactSidebar} />
+      <main
+        className={clsx("mt-14", isCompactSidebar ? "lg:ml-16" : "lg:ml-64")}
+      >
+        {children}
+      </main>
     </>
   );
 };
@@ -67,7 +77,11 @@ const DashboardLayout: FC<PropsWithChildren> = ({ children }) => {
 export default DashboardLayout;
 
 const Header = ({ user }: { user: User }) => (
-  <header className="fixed top-0 left-0 right-0 z-30 h-14 border-b border-slate-100 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+  <header
+    className={clsx(
+      "fixed top-0 left-0 right-0 z-30 h-14 border-b border-slate-100 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+    )}
+  >
     <div className="h-full px-4">
       <div className="relative flex h-full items-center">
         <Link href="/dashboard" className="mr-auto text-xl font-bold">
@@ -82,11 +96,11 @@ const Header = ({ user }: { user: User }) => (
           </a>
         </nav>
         <button className="-my-2.5 mr-6 inline-flex items-center justify-center rounded-lg bg-slate-900 py-2.5 px-4 text-sm font-semibold text-white hover:bg-slate-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 lg:hidden">
-          <HiPlus className="mr-2 -ml-1 text-xl" />
+          <HiOutlinePlus className="mr-2 -ml-1 text-xl" />
           New Project
         </button>
         <button className="-m-2.5 p-2.5 text-2xl lg:hidden">
-          <HiBars3 />
+          <HiOutlineBars3 />
         </button>
         <div className="ml-8 border-l border-slate-100 pl-8 dark:border-zinc-800 max-lg:hidden">
           <UserDropdown user={user} />
@@ -98,6 +112,7 @@ const Header = ({ user }: { user: User }) => (
 
 const Sidebar = ({
   menu,
+  compact,
 }: {
   menu: {
     id: string;
@@ -105,12 +120,29 @@ const Sidebar = ({
     href: string;
     icon: ReactNode;
   }[];
+  compact: boolean;
 }) => (
-  <aside className="fixed left-0 top-14 bottom-0 z-30 w-64 border-r border-slate-100 bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 max-lg:hidden">
-    <div className="my-6 space-y-6 px-4">
-      <button className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium hover:border-slate-300 dark:border-zinc-700 dark:hover:border-zinc-600">
-        <HiPlus className="mr-2 text-xl" />
-        New Project
+  <aside
+    className={clsx(
+      "fixed left-0 top-14 bottom-0 z-30 border-r border-slate-100 bg-white dark:border-zinc-800 dark:bg-zinc-900 max-lg:hidden",
+      compact ? "w-16" : "w-64"
+    )}
+  >
+    <div
+      className={clsx(
+        compact
+          ? "my-4 flex flex-col items-center space-y-4"
+          : "my-6 space-y-6 px-4"
+      )}
+    >
+      <button
+        className={clsx(
+          "inline-flex w-full items-center justify-center rounded-lg border border-slate-200 hover:border-slate-300 dark:border-zinc-700 dark:hover:border-zinc-600",
+          compact ? "h-10 w-10" : "px-4 py-2.5 text-sm font-medium"
+        )}
+      >
+        <HiOutlinePlus className={compact ? "text-2xl" : "mr-2 text-xl"} />
+        {!compact && "New Project"}
       </button>
 
       <nav>
@@ -118,10 +150,15 @@ const Sidebar = ({
           <Link
             key={item.id}
             href={item.href}
-            className="flex items-center rounded-lg py-2 px-4 hover:bg-slate-100 dark:hover:bg-zinc-800"
+            className={clsx(
+              "flex items-center rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800",
+              compact ? "h-10 w-10 justify-center" : "py-2 px-4"
+            )}
           >
-            <span className="mr-4 text-xl">{item.icon}</span>
-            {item.name}
+            <span className={clsx(compact ? "text-xl" : "mr-4 text-xl")}>
+              {item.icon}
+            </span>
+            {!compact && item.name}
           </Link>
         ))}
       </nav>

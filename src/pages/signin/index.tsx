@@ -17,7 +17,7 @@ const SignIn: CustomNextPage = () => {
         </div>
 
         <form className="m-4 sm:m-6">
-          <label className="block text-gray-600 dark:text-zinc-300">
+          <label className="block text-slate-600 dark:text-zinc-300">
             Email
             <input
               type="text"

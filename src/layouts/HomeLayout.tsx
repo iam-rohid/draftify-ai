@@ -78,7 +78,7 @@ const Header = ({
         >
           {sidebarOpen ? <HiXMark /> : <HiBars3 />}
         </button>
-        <div className="lg:border-slate-900/15 hidden lg:ml-8 lg:flex lg:items-center lg:border-l lg:pl-8">
+        <div className="ml-8 flex items-center border-l border-slate-100 pl-8 dark:border-zinc-800 max-lg:hidden">
           {isLoading ? (
             <p>Loading...</p>
           ) : user ? (
@@ -127,7 +127,7 @@ const MobileSidebar = ({
         onClick={() => onSidebarOpenChange(false)}
       />
       <aside className="sidebar absolute top-0 bottom-0 -right-full w-full max-w-xs overflow-y-auto bg-white transition-[right] duration-300 dark:bg-zinc-900">
-        <header className="flex items-center border-b border-gray-100 py-6 px-4 dark:border-zinc-800">
+        <header className="flex items-center border-b border-slate-100 py-6 px-4 dark:border-zinc-800">
           <Link
             href="/"
             className="mr-auto text-xl font-bold"
@@ -208,7 +208,7 @@ const MobileSidebar = ({
           )}
         </div>
 
-        <div className="h-px w-full bg-gray-100  dark:bg-zinc-800" />
+        <div className="h-px w-full bg-slate-100  dark:bg-zinc-800" />
 
         <nav className="m-4">
           <Link
