@@ -33,7 +33,7 @@ export const useCreateCompletionMutation = () => {
 
       matchs.forEach((key) => {
         const id = key.replaceAll(/[\[\]]/g, "");
-        const value = (formData.get(id) ?? "") as string;
+        const value = (formData.get(id) || "") as string;
         if (value) {
           finalPrompt = finalPrompt.replaceAll(key, value.trim());
         }
@@ -43,11 +43,11 @@ export const useCreateCompletionMutation = () => {
         data: { choices, model, id },
       } = await openai.createCompletion({
         prompt: finalPrompt,
-        model: options?.model ?? "text-davinci-003",
-        max_tokens: options?.maxTokens ?? 100,
-        top_p: options?.topP ?? 1,
-        n: options?.choiceCount ?? 3,
-        best_of: options?.bestOfCount ?? 4,
+        model: options?.model || "text-davinci-003",
+        max_tokens: options?.maxTokens || 100,
+        top_p: options?.topP || 1,
+        n: options?.choiceCount || 3,
+        best_of: options?.bestOfCount || 4,
       });
 
       return {

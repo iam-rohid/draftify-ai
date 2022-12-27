@@ -7,7 +7,7 @@ export type ProjectEntity = {
   name?: string;
   description?: string;
   templateId: string;
-  body?: string;
+  content?: any;
 };
 
 export const projectToDoc = (
@@ -15,14 +15,15 @@ export const projectToDoc = (
 ): {
   [field: string]: any;
 } => {
-  const { name, createdAt, updatedAt, templateId, body, description } = project;
+  const { name, createdAt, updatedAt, templateId, content, description } =
+    project;
   return {
     createdAt,
     templateId,
-    body: body ?? null,
-    description: description ?? null,
-    name: name ?? null,
-    updatedAt: updatedAt ?? null,
+    content: content || null,
+    description: description || null,
+    name: name || null,
+    updatedAt: updatedAt || null,
   };
 };
 
@@ -36,6 +37,6 @@ export const projectFromDoc = (
     name: doc.get("name"),
     description: doc.get("description"),
     templateId: doc.get("templateId"),
-    body: doc.get("body"),
+    content: doc.get("content"),
   };
 };

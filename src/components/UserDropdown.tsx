@@ -31,7 +31,7 @@ const UserDropdown = ({ user }: { user: User }) => {
                   Account
                 </p>
                 <p className="truncate text-sm">
-                  {user.displayName ?? user.email ?? "Unknown User"}
+                  {user.displayName || user.email || "Unknown User"}
                 </p>
               </div>
             </Link>

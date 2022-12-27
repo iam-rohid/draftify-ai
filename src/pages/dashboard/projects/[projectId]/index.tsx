@@ -5,10 +5,19 @@ import ProjectLayout from "@/layouts/ProjectLayout";
 import { useAuth } from "@/providers/AuthProvider";
 import { CustomNextPage } from "@/types/next";
 import { useRouter } from "next/router";
-import { FormEvent, useCallback, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { HiArrowRight } from "react-icons/hi2";
 import TextCompletionCard from "@/components/TextCompletionCard";
 import { nanoid } from "nanoid";
+import { useUpdateProjectMutation } from "@/hooks/mutations/useUpdateProjectMutation";
+import dynamic from "next/dynamic";
+import { type RemirrorJSON } from "remirror";
+import { MdAutorenew, MdCheck, MdError } from "react-icons/md";
+
+const RemirrorEditor = dynamic(import("@/remirror-editor"), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
 
 const Project: CustomNextPage = () => {
   const router = useRouter();
@@ -19,6 +28,104 @@ const Project: CustomNextPage = () => {
     isError,
     error,
   } = useProjectQuery(user!.uid, router.query["projectId"] as string);
+  const {
+    mutate: saveProjectMutate,
+    status: savingStatus,
+    error: savingError,
+  } = useUpdateProjectMutation();
+  const [savedProject, setSavedProject] = useState<{
+    name?: string;
+    content?: RemirrorJSON;
+  }>({
+    name: undefined,
+    content: undefined,
+  });
+  const [content, setContent] = useState<RemirrorJSON | undefined>(undefined);
+  const [nameText, setNameText] = useState<string | undefined>(undefined);
+  const [lookForChanges, setLookForChanges] = useState(false);
+  const isOldData = useMemo(
+    () =>
+      lookForChanges &&
+      (JSON.stringify(savedProject.content) !== JSON.stringify(content) ||
+        savedProject?.name != nameText),
+    [
+      lookForChanges,
+      savedProject.content,
+      savedProject?.name,
+      content,
+      nameText,
+    ]
+  );
+
+  useEffect(() => {
+    if (project) {
+      const content = project.content || undefined;
+      const name = project.name;
+      setSavedProject({
+        name,
+        content,
+      });
+      setContent(content);
+      setNameText(name);
+      setLookForChanges(true);
+    }
+  }, [project]);
+
+  const handleSave = useCallback(
+    (data: { name?: string; content?: any }) => {
+      if (!project || !user) return;
+      if (savingStatus === "loading") return;
+      if (!isOldData) return;
+      saveProjectMutate(
+        {
+          projectId: project.id,
+          userId: user.uid,
+          data,
+        },
+        {
+          onSuccess: () => {
+            setSavedProject(data);
+          },
+        }
+      );
+    },
+    [project, user, savingStatus, isOldData, saveProjectMutate]
+  );
+
+  useEffect(() => {
+    const timeout = setTimeout(
+      () =>
+        handleSave({
+          content: content,
+          name: nameText,
+        }),
+      500
+    );
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [handleSave, content, nameText]);
+
+  const handleWindowLoad = (event: BeforeUnloadEvent) => {
+    event.preventDefault();
+    return (event.returnValue =
+      "There are some unsaved changes. Are you sure you want to leave this page?");
+  };
+
+  useEffect(() => {
+    if (isOldData) {
+      window.addEventListener("beforeunload", handleWindowLoad, {
+        capture: true,
+      });
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleWindowLoad, {
+        capture: true,
+      });
+    };
+  }, [isOldData]);
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -34,14 +141,29 @@ const Project: CustomNextPage = () => {
     <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
       <div className="flex flex-1 flex-col">
         <header className="flex h-12 w-full items-center border-b border-slate-100 px-4 dark:border-zinc-800">
-          <p>{project.name ?? "Untitled"}</p>
+          <input
+            type="text"
+            value={nameText}
+            placeholder="Untitled"
+            onChange={(e) => setNameText(e.currentTarget.value)}
+            className="h-full w-full flex-1 bg-transparent outline-none"
+          />
+          <SaveStatus status={savingStatus} />
         </header>
         <div className="flex-1 overflow-y-auto px-4 py-6 md:px-6 md:py-12">
-          <FormView templateId={project.templateId} />
+          <div className="mx-auto max-w-2xl">
+            <FormView templateId={project.templateId} />
+          </div>
         </div>
       </div>
       <div className="h-full w-px bg-slate-100 dark:bg-zinc-800 max-md:hidden" />
-      <Editor defaultValue={project.body} />
+      <div className="flex h-full flex-1 overflow-hidden lg:max-w-[48rem]">
+        <RemirrorEditor
+          placeholder="Start typing here..."
+          initialContent={project.content}
+          onChange={setContent}
+        />
+      </div>
     </div>
   );
 };
@@ -159,7 +281,7 @@ const FormView = ({ templateId }: { templateId: string }) => {
                       placeholder={input.placeholder}
                       minLength={input.minLength}
                       maxLength={input.maxLength}
-                      rows={input.rows ?? 4}
+                      rows={input.rows || 4}
                       required={input.isRequired}
                     />
                   </div>
@@ -197,25 +319,39 @@ const FormView = ({ templateId }: { templateId: string }) => {
   );
 };
 
-const Editor = ({
-  value,
-  defaultValue,
-  onChange,
+const SaveStatus = ({
+  status,
 }: {
-  defaultValue?: string;
-  value?: string;
-  onChange?: (value: string) => void;
+  status: "idle" | "old" | "error" | "loading" | "success";
 }) => {
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex h-12 w-full items-center border-b border-slate-100 px-4 dark:border-zinc-800"></header>
-      <textarea
-        className="flex-1 resize-none bg-transparent p-4 outline-none"
-        placeholder="Start typing..."
-        defaultValue={defaultValue}
-        value={value}
-        onChange={(e) => onChange?.(e.currentTarget.value)}
-      />
+    <div className="flex items-center rounded-md px-3 py-1.5 text-sm">
+      {status === "error" ? (
+        <>
+          <MdError className="mr-1.5 -ml-1 text-xl" />
+          <p>Failed to save</p>
+        </>
+      ) : status === "loading" ? (
+        <>
+          <MdAutorenew className="mr-1.5 -ml-1 text-xl" />
+          <p>Saving...</p>
+        </>
+      ) : status === "success" ? (
+        <>
+          <MdCheck className="mr-1.5 -ml-1 text-xl" />
+          <p>Saved</p>
+        </>
+      ) : status === "old" ? (
+        <>
+          <MdAutorenew className="mr-1.5 -ml-1 text-xl" />
+          <p>Changes Detected</p>
+        </>
+      ) : (
+        <>
+          <MdCheck className="mr-1.5 -ml-1 text-xl" />
+          <p>Idle</p>
+        </>
+      )}
     </div>
   );
 };

@@ -24,10 +24,10 @@ export const useCreateProjectMutation = () => {
       const project: ProjectEntity = {
         id,
         name,
-        templateId: templateId ?? "facebook-ad",
+        templateId: templateId || "facebook-ad",
         createdAt: new Date().toISOString(),
         description,
-        body,
+        content: body,
       };
       const docRef = doc(firestoreClient, "users", userId, "projects", id);
       await setDoc(docRef, projectToDoc(project), { merge: true });
