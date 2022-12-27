@@ -1,5 +1,4 @@
 import TemplateCard from "@/components/TemplateCard";
-import { templates } from "@/data/templates";
 import { useCreateProjectMutation } from "@/hooks/mutations/useCreateProjectMutation";
 import { useTemplatesQuery } from "@/hooks/queries/useTemplatesQuery";
 import DashboardLayout from "@/layouts/DashboardLayout";
@@ -23,7 +22,7 @@ const Templates: CustomNextPage = () => {
       createProjectMutate(
         {
           userId: user.uid,
-          template,
+          templateId: template.id,
         },
         {
           onSuccess(data) {
