@@ -1,5 +1,4 @@
 import { openai } from "@/libs/openai";
-import { Template } from "@/models/template";
 import { useMutation } from "@tanstack/react-query";
 
 export const useCreateCompletionMutation = () => {
@@ -7,7 +6,10 @@ export const useCreateCompletionMutation = () => {
     mutationKey: ["generate"],
     mutationFn: async (variables: {
       formData: FormData;
-      template: Template;
+      template: {
+        inputs: any;
+        prompt: string;
+      };
       options?: {
         maxTokens?: number;
         choiceCount?: number;

@@ -1,8 +1,5 @@
-import { firestoreClient } from "@/libs/fireabseClient";
-import { ProjectEntity, projectToDoc } from "@/models/project";
+import { supabaseClient } from "@/libs/supabaseClient";
 import { useMutation } from "@tanstack/react-query";
-import { doc, setDoc } from "firebase/firestore";
-import { nanoid } from "nanoid";
 
 export const useCreateProjectMutation = () => {
   return useMutation({
@@ -12,26 +9,27 @@ export const useCreateProjectMutation = () => {
       templateId,
       name,
       description,
-      body,
     }: {
       userId: string;
+      templateId: string;
       name?: string;
-      templateId?: string;
       description?: string;
-      body?: string;
     }) => {
-      const id = nanoid();
-      const project: ProjectEntity = {
-        id,
-        name,
-        templateId: templateId || "facebook-ad",
-        createdAt: new Date().toISOString(),
-        description,
-        content: body,
-      };
-      const docRef = doc(firestoreClient, "users", userId, "projects", id);
-      await setDoc(docRef, projectToDoc(project), { merge: true });
-      return project;
+      return supabaseClient
+        .from("projects")
+        .insert({
+          user_id: userId,
+          template_id: templateId,
+          name: name,
+          description: description,
+        })
+        .select("id")
+        .limit(1)
+        .single()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return data["id"] as string;
+        });
     },
   });
 };

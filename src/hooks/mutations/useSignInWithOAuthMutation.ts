@@ -1,18 +1,13 @@
-import { authClient } from "@/libs/fireabseClient";
 import { useMutation } from "@tanstack/react-query";
-import {
-  AuthProvider,
-  GithubAuthProvider,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
+import { Provider } from "@supabase/supabase-js";
+import { supabaseClient } from "@/libs/supabaseClient";
 
-const providerFor = (provider: string): AuthProvider => {
+const providerFor = (provider: string): Provider => {
   switch (provider) {
     case "google":
-      return new GoogleAuthProvider();
+      return "google";
     case "github":
-      return new GithubAuthProvider();
+      return "github";
     default:
       throw `Uhknown provider ${provider}`;
   }
@@ -21,8 +16,13 @@ const providerFor = (provider: string): AuthProvider => {
 export const useSignInWIthOAuthMuation = () => {
   return useMutation({
     mutationKey: ["sign-in-with-oauth"],
-    mutationFn: (provider: string) => {
-      return signInWithPopup(authClient, providerFor(provider));
+    mutationFn: (provider: Provider) => {
+      return supabaseClient.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
     },
   });
 };

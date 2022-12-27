@@ -1,6 +1,5 @@
-import { firestoreClient } from "@/libs/fireabseClient";
+import { supabaseClient } from "@/libs/supabaseClient";
 import { useMutation } from "@tanstack/react-query";
-import { doc, updateDoc } from "firebase/firestore";
 
 export const useUpdateProjectMutation = () => {
   return useMutation({
@@ -9,24 +8,24 @@ export const useUpdateProjectMutation = () => {
       userId: string;
       data: {
         name?: string | null;
+        description?: string | null;
         content?: any;
         isFavorite?: boolean | null;
         isDeleted?: boolean | null;
       };
     }) => {
       const { userId, projectId, data } = variables;
-      const docRef = doc(
-        firestoreClient,
-        "users",
-        userId,
-        "projects",
-        projectId
-      );
-
-      return updateDoc(docRef, {
-        ...data,
-        updatedAt: new Date().toISOString(),
-      });
+      return supabaseClient
+        .from("projects")
+        .update({
+          name: data.name,
+          content: data.content,
+          description: data.description,
+        })
+        .match({
+          id: projectId,
+          user_id: userId,
+        });
     },
   });
 };

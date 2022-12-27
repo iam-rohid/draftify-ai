@@ -1,6 +1,5 @@
 import { useCreateCompletionMutation } from "@/hooks/mutations/useCreateCompletionMutation";
 import { useProjectQuery } from "@/hooks/queries/useProjectQuery";
-import { useTemplateQuery } from "@/hooks/queries/useTemplateQuery";
 import ProjectLayout from "@/layouts/ProjectLayout";
 import { useAuth } from "@/providers/AuthProvider";
 import { CustomNextPage } from "@/types/next";
@@ -13,6 +12,7 @@ import { useUpdateProjectMutation } from "@/hooks/mutations/useUpdateProjectMuta
 import dynamic from "next/dynamic";
 import { type RemirrorJSON } from "remirror";
 import { MdAutorenew, MdCheck, MdError } from "react-icons/md";
+import { InputField } from "@/types/input-field";
 
 const RemirrorEditor = dynamic(import("@/remirror-editor"), {
   ssr: false,
@@ -27,7 +27,7 @@ const Project: CustomNextPage = () => {
     isLoading,
     isError,
     error,
-  } = useProjectQuery(user!.uid, router.query["projectId"] as string);
+  } = useProjectQuery(user!.id, router.query["projectId"] as string);
   const {
     mutate: saveProjectMutate,
     status: savingStatus,
@@ -79,7 +79,7 @@ const Project: CustomNextPage = () => {
       saveProjectMutate(
         {
           projectId: project.id,
-          userId: user.uid,
+          userId: user.id,
           data,
         },
         {
@@ -152,7 +152,14 @@ const Project: CustomNextPage = () => {
         </header>
         <div className="flex-1 overflow-y-auto px-4 py-6 md:px-6 md:py-12">
           <div className="mx-auto max-w-2xl">
-            <FormView templateId={project.templateId} />
+            {project.template && (
+              <FormView
+                id={project.template.id}
+                inputs={project.template.inputs}
+                name={project.template.name}
+                prompt={project.template.prompt}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -172,7 +179,17 @@ export default Project;
 
 Project.getLayout = (page) => <ProjectLayout>{page}</ProjectLayout>;
 
-const FormView = ({ templateId }: { templateId: string }) => {
+const FormView = ({
+  id,
+  inputs,
+  prompt,
+  name,
+}: {
+  id: string;
+  inputs: InputField[];
+  prompt: string;
+  name: string;
+}) => {
   const [completions, setCompletions] = useState<
     {
       id: string;
@@ -180,13 +197,6 @@ const FormView = ({ templateId }: { templateId: string }) => {
       createdAt: string;
     }[]
   >([]);
-
-  const {
-    data: template,
-    isLoading,
-    isError,
-    error,
-  } = useTemplateQuery(templateId);
   const { mutate: generateMutate, isLoading: isGenerating } =
     useCreateCompletionMutation();
 
@@ -198,13 +208,15 @@ const FormView = ({ templateId }: { templateId: string }) => {
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (!template) return;
 
       const formData = new FormData(event.currentTarget);
       generateMutate(
         {
           formData: formData,
-          template: template,
+          template: {
+            prompt,
+            inputs,
+          },
         },
         {
           onSuccess: (data) => {
@@ -221,26 +233,16 @@ const FormView = ({ templateId }: { templateId: string }) => {
         }
       );
     },
-    [generateMutate, template]
+    [generateMutate, inputs, prompt]
   );
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (isError) {
-    return (
-      <p>{error instanceof Error ? error.message : "Something went wrong!"}</p>
-    );
-  }
 
   return (
     <div>
-      <h2 className="mb-4 text-2xl font-bold">{template.name}</h2>
+      <h2 className="mb-4 text-2xl font-bold">{name}</h2>
 
       <form onSubmit={handleSubmit}>
         <div className="mb-8 space-y-4">
-          {template.inputs.map((input) => {
+          {inputs.map((input) => {
             switch (input.type) {
               case "text":
                 return (
@@ -254,13 +256,13 @@ const FormView = ({ templateId }: { templateId: string }) => {
                     <input
                       id={input.id}
                       name={input.id}
-                      defaultValue={input.defaultValue}
+                      defaultValue={input.default_value}
                       type="text"
                       className="mt-2 block w-full rounded-lg bg-transparent px-4 py-2.5 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 dark:ring-zinc-700"
                       placeholder={input.placeholder}
-                      minLength={input.minLength}
-                      maxLength={input.maxLength}
-                      required={input.isRequired}
+                      minLength={input.min_length}
+                      maxLength={input.max_length}
+                      required={input.is_required}
                     />
                   </div>
                 );
@@ -276,13 +278,13 @@ const FormView = ({ templateId }: { templateId: string }) => {
                     <textarea
                       id={input.id}
                       name={input.id}
-                      defaultValue={input.defaultValue}
+                      defaultValue={input.default_value}
                       className="mt-2 block w-full rounded-lg bg-transparent p-4 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 dark:ring-zinc-700"
                       placeholder={input.placeholder}
-                      minLength={input.minLength}
-                      maxLength={input.maxLength}
+                      minLength={input.min_length}
+                      maxLength={input.max_length}
                       rows={input.rows || 4}
-                      required={input.isRequired}
+                      required={input.is_required}
                     />
                   </div>
                 );

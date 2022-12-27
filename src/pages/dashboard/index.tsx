@@ -4,7 +4,6 @@ import { useCreateProjectMutation } from "@/hooks/mutations/useCreateProjectMuta
 import { useProjectsQuery } from "@/hooks/queries/useProjectsQuery";
 import { useTemplatesQuery } from "@/hooks/queries/useTemplatesQuery";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { Template } from "@/models/template";
 import { useAuth } from "@/providers/AuthProvider";
 import { CustomNextPage } from "@/types/next";
 import Link from "next/link";
@@ -17,22 +16,22 @@ const Dashboard: CustomNextPage = () => {
   const { data: templates, isLoading: isTemplatesLoading } =
     useTemplatesQuery();
   const { data: projects, isLoading } = useProjectsQuery({
-    userId: user!.uid,
+    userId: user!.id,
   });
   const { mutate: createProjectMutate } = useCreateProjectMutation();
   const router = useRouter();
 
   const handleCreateProjectFromTemplate = useCallback(
-    (template: Template) => {
+    (templateId: string) => {
       if (!user) return;
       createProjectMutate(
         {
-          userId: user.uid,
-          templateId: template.id,
+          userId: user.id,
+          templateId,
         },
         {
-          onSuccess(data) {
-            router.push(`/dashboard/projects/${data.id}`);
+          onSuccess: (projectId) => {
+            router.push(`/dashboard/projects/${projectId}`);
           },
         }
       );
@@ -61,7 +60,9 @@ const Dashboard: CustomNextPage = () => {
               ?.slice(0, 4)
               .map((template) => (
                 <TemplateCard
-                  template={template}
+                  templateId={template.id}
+                  name={template.name}
+                  description={template.description}
                   key={template.id}
                   onClick={handleCreateProjectFromTemplate}
                 />

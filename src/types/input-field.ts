@@ -1,27 +1,27 @@
 export type TextField = {
   type: "text";
-  defaultValue?: string;
+  default_value?: string;
   placeholder?: string;
-  minLength?: number;
-  maxLength?: number;
+  min_length?: number;
+  max_length?: number;
 };
 
 export type TextareaField = {
   type: "textarea";
   rows?: number;
-  defaultValue?: string;
+  default_value?: string;
   placeholder?: string;
-  minLength?: number;
-  maxLength?: number;
+  min_length?: number;
+  max_length?: number;
 };
 
 export type CheckboxField = {
   type: "checkbox";
-  defaultValue?: boolean;
+  default_value?: boolean;
 };
 
 export type InputField = (TextField | TextareaField | CheckboxField) & {
   id: string;
-  isRequired: boolean;
+  is_required: boolean;
   label: string;
 };

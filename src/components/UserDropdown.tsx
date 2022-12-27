@@ -1,4 +1,3 @@
-import { User } from "firebase/auth";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   HiArrowLeftOnRectangle,
@@ -8,6 +7,7 @@ import {
 } from "react-icons/hi2";
 import Link from "next/link";
 import { useSignOutMutation } from "@/hooks/mutations/useSignOutMutation";
+import { User } from "@supabase/supabase-js";
 
 const UserDropdown = ({ user }: { user: User }) => {
   const { mutate: signOut } = useSignOutMutation();
@@ -31,7 +31,7 @@ const UserDropdown = ({ user }: { user: User }) => {
                   Account
                 </p>
                 <p className="truncate text-sm">
-                  {user.displayName || user.email || "Unknown User"}
+                  {user.email || "Unknown User"}
                 </p>
               </div>
             </Link>

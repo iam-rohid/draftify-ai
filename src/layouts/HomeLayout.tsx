@@ -1,6 +1,6 @@
 import UserDropdown from "@/components/UserDropdown";
 import { useAuth } from "@/providers/AuthProvider";
-import { User } from "firebase/auth";
+import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { HiBars3, HiXMark } from "react-icons/hi2";

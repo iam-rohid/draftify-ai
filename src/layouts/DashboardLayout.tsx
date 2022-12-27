@@ -1,7 +1,7 @@
 import UserDropdown from "@/components/UserDropdown";
 import { useAuth } from "@/providers/AuthProvider";
+import { User } from "@supabase/supabase-js";
 import clsx from "clsx";
-import { User } from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, PropsWithChildren, ReactNode, useMemo, useState } from "react";

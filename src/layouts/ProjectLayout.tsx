@@ -18,7 +18,12 @@ const ProjectLayout: FC<PropsWithChildren> = ({ children }) => {
               <p>loading...</p>
             ) : (
               templates?.map((template) => (
-                <TemplateRow key={template.id} template={template} />
+                <TemplateRow
+                  key={template.id}
+                  templateId={template.id}
+                  name={template.name}
+                  description={template.description}
+                />
               ))
             )}
           </div>

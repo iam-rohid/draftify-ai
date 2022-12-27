@@ -1,16 +1,23 @@
-import { firestoreClient } from "@/libs/fireabseClient";
-import { templateFromDoc } from "@/models/template";
+import { supabaseClient } from "@/libs/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs } from "firebase/firestore";
 
 export const useTemplatesQuery = () => {
   return useQuery({
     queryKey: ["templates"],
-    queryFn: async () => {
-      const colRef = collection(firestoreClient, "templates");
-      const snapshot = await getDocs(colRef);
-      return snapshot.docs.map((doc) => templateFromDoc(doc));
-    },
+    queryFn: async () =>
+      supabaseClient
+        .from("templates")
+        .select("id,description,name")
+        .eq("is_public", true)
+        .then(({ data: templates, error }) => {
+          if (error) throw error;
+          if (!templates) throw "Something went wrong";
+          return templates.map((template) => ({
+            id: template["id"],
+            name: template["name"],
+            description: template["description"],
+          }));
+        }),
     staleTime: 32 * 60 * 1000,
   });
 };

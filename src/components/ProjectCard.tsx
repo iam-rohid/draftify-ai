@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo } from "react";
-import { ProjectEntity } from "@/models/project";
-import {
-  MdDescription,
-  MdMenu,
-  MdMoreVert,
-  MdReadMore,
-  MdTextFields,
-} from "react-icons/md";
+import { MdMoreVert } from "react-icons/md";
 import { HiOutlineDocument } from "react-icons/hi2";
 
-const ProjectCard = ({ project }: { project: ProjectEntity }) => {
+const ProjectCard = ({
+  project,
+}: {
+  project: {
+    id: string;
+    name: string | undefined;
+    createdAt: string;
+    updatedAt: string | undefined;
+    description: string | undefined;
+  };
+}) => {
   const time = useMemo(
     () =>
       !!project.updatedAt

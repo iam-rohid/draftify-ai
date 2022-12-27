@@ -1,16 +1,20 @@
-import { firestoreClient } from "@/libs/fireabseClient";
-import { templateFromDoc } from "@/models/template";
+import { supabaseClient } from "@/libs/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
-import { doc, getDoc } from "firebase/firestore";
 
 export const useTemplateQuery = (templateId: string) => {
   return useQuery({
     queryKey: ["template", templateId],
-    queryFn: async () => {
-      const docRef = doc(firestoreClient, "templates", templateId);
-      const snapshot = await getDoc(docRef);
-      return templateFromDoc(snapshot);
-    },
+    queryFn: async () =>
+      supabaseClient
+        .from("templates")
+        .select("*")
+        .eq("id", templateId)
+        .limit(1)
+        .single()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return data;
+        }),
     staleTime: 15 * 60 * 1000,
   });
 };

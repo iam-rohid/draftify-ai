@@ -1,9 +1,10 @@
-import { authClient } from "@/libs/fireabseClient";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { supabaseClient } from "@/libs/supabaseClient";
+import { User } from "@supabase/supabase-js";
 import {
   createContext,
   FC,
   PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -27,23 +28,27 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   const isLoggedIn = useMemo(() => !isLoading && !!user, [user, isLoading]);
   const isError = useMemo(() => error !== null, [error]);
 
+  const fetchUser = useCallback(async () => {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error) {
+      console.error(error);
+    } else {
+      setUser(data.user);
+    }
+    setIsLoading(false);
+  }, []);
+
   useEffect(() => {
-    return onAuthStateChanged(
-      authClient,
-      (user) => {
-        setUser(user);
-        if (isLoading) {
-          setIsLoading(false);
-        }
+    fetchUser();
+    const {
+      data: {
+        subscription: { unsubscribe },
       },
-      (error) => {
-        setError(error);
-        if (isLoading) {
-          setIsLoading(false);
-        }
-      }
-    );
-  }, [isLoading]);
+    } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+    return unsubscribe;
+  }, [fetchUser]);
 
   return (
     <authContext.Provider
