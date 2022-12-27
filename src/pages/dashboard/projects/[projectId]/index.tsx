@@ -72,7 +72,7 @@ const Project: CustomNextPage = () => {
   }, [project]);
 
   const handleSave = useCallback(
-    (data: { name?: string; content?: any }) => {
+    (data: { name?: string; content?: any; description?: string }) => {
       if (!project || !user) return;
       if (savingStatus === "loading") return;
       if (!isOldData) return;
