@@ -60,7 +60,7 @@ const RemirrorEditor = ({
 export default RemirrorEditor;
 
 const iconButtonClsx = clsx(
-  "rounded-md h-8 w-8 flex items-center justify-center font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 [&.active]:bg-indigo-500 [&.active]:text-white disabled:opacity-50 disabled:pointer-events-none"
+  "rounded-md h-8 w-8 flex items-center justify-center font-medium hover:bg-slate-200 dark:hover:bg-zinc-800 [&.active]:bg-indigo-500 [&.active]:text-white disabled:opacity-50 disabled:pointer-events-none"
 );
 
 const Toolbar = () => {
@@ -69,7 +69,7 @@ const Toolbar = () => {
   const active = useActive();
   const { undoDepth, redoDepth } = useHelpers();
   return (
-    <header className="flex h-12 w-full items-center gap-px border-b border-slate-100 px-4 dark:border-zinc-800">
+    <header className="flex h-12 w-full items-center gap-px overflow-x-auto border-b border-slate-200 px-4 dark:border-zinc-800">
       <button
         className={clsx(iconButtonClsx, {
           active: active.heading({ level: 1 }),
@@ -238,7 +238,7 @@ const Footer = () => {
   const { getCharacterCount, getWordCount } = useHelpers();
 
   return (
-    <footer className="flex h-10 w-full items-center border-t border-slate-100 px-4 text-sm text-slate-600 dark:border-zinc-800 dark:text-zinc-300">
+    <footer className="flex h-10 w-full items-center border-t border-slate-200 px-4 text-sm text-slate-600 dark:border-zinc-800 dark:text-zinc-300">
       <span className="mr-2">{getCharacterCount()} characters</span>
       <span className="mr-2">•</span>
       <span>{getWordCount()} words</span>

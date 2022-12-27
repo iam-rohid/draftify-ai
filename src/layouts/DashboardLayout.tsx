@@ -25,9 +25,9 @@ const DashboardLayout: FC<
   const mainMenu = useMemo(
     () => [
       {
-        id: "dashboard",
-        name: "Dashboard",
-        href: "/dashboard",
+        id: "projects",
+        name: "Projects",
+        href: "/dashboard/projects",
         icon: <HiOutlineHome />,
       },
       {
@@ -62,7 +62,7 @@ const DashboardLayout: FC<
   }
 
   return (
-    <>
+    <div className="h-screen overflow-hidden bg-slate-100 dark:bg-zinc-900">
       <Header user={user} />
       <Sidebar menu={mainMenu} compact={isCompactSidebar} />
       <main
@@ -70,7 +70,7 @@ const DashboardLayout: FC<
       >
         {children}
       </main>
-    </>
+    </div>
   );
 };
 
@@ -79,7 +79,7 @@ export default DashboardLayout;
 const Header = ({ user }: { user: User }) => (
   <header
     className={clsx(
-      "fixed top-0 left-0 right-0 z-30 h-14 border-b border-slate-100 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+      "fixed top-0 left-0 right-0 z-30 h-14 border-b border-slate-200 bg-slate-100 dark:border-zinc-800 dark:bg-zinc-900"
     )}
   >
     <div className="h-full px-4">
@@ -102,7 +102,7 @@ const Header = ({ user }: { user: User }) => (
         <button className="-m-2.5 p-2.5 text-2xl lg:hidden">
           <HiOutlineBars3 />
         </button>
-        <div className="ml-8 border-l border-slate-100 pl-8 dark:border-zinc-800 max-lg:hidden">
+        <div className="ml-8 border-l border-slate-200 pl-8 dark:border-zinc-800 max-lg:hidden">
           <UserDropdown user={user} />
         </div>
       </div>
@@ -121,47 +121,52 @@ const Sidebar = ({
     icon: ReactNode;
   }[];
   compact: boolean;
-}) => (
-  <aside
-    className={clsx(
-      "fixed left-0 top-14 bottom-0 z-30 border-r border-slate-100 bg-white dark:border-zinc-800 dark:bg-zinc-900 max-lg:hidden",
-      compact ? "w-16" : "w-64"
-    )}
-  >
-    <div
+}) => {
+  const router = useRouter();
+
+  return (
+    <aside
       className={clsx(
-        compact
-          ? "my-4 flex flex-col items-center space-y-4"
-          : "my-6 space-y-6 px-4"
+        "fixed left-0 top-14 bottom-0 z-30 border-r border-slate-200 bg-slate-100 dark:border-zinc-800 dark:bg-zinc-900 max-lg:hidden",
+        compact ? "w-16" : "w-64"
       )}
     >
-      <button
+      <div
         className={clsx(
-          "inline-flex w-full items-center justify-center rounded-lg border border-slate-200 hover:border-slate-300 dark:border-zinc-700 dark:hover:border-zinc-600",
-          compact ? "h-10 w-10" : "px-4 py-2.5 text-sm font-medium"
+          compact
+            ? "my-4 flex flex-col items-center space-y-4"
+            : "my-6 space-y-6 px-4"
         )}
       >
-        <HiOutlinePlus className={compact ? "text-2xl" : "mr-2 text-xl"} />
-        {!compact && "New Project"}
-      </button>
+        <button
+          className={clsx(
+            "flex w-full items-center justify-center rounded-lg border border-slate-300 hover:border-slate-400 dark:border-zinc-700 dark:hover:border-zinc-400",
+            compact ? "h-10 w-10" : "px-4 py-2.5 text-sm font-medium"
+          )}
+        >
+          <HiOutlinePlus className={compact ? "text-2xl" : "mr-2 text-xl"} />
+          {!compact && "New Project"}
+        </button>
 
-      <nav>
-        {menu.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            className={clsx(
-              "flex items-center rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800",
-              compact ? "h-10 w-10 justify-center" : "py-2 px-4"
-            )}
-          >
-            <span className={clsx(compact ? "text-xl" : "mr-4 text-xl")}>
-              {item.icon}
-            </span>
-            {!compact && item.name}
-          </Link>
-        ))}
-      </nav>
-    </div>
-  </aside>
-);
+        <nav className="space-y-px">
+          {menu.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={clsx(
+                "flex items-center rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-800 [&.active]:bg-slate-200 dark:[&.active]:bg-zinc-800",
+                compact ? "h-10 w-10 justify-center" : "py-2 px-4",
+                { active: router.pathname.startsWith(item.href) }
+              )}
+            >
+              <span className={clsx(compact ? "text-xl" : "mr-4 text-xl")}>
+                {item.icon}
+              </span>
+              {!compact && item.name}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </aside>
+  );
+};

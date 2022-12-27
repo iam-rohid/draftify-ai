@@ -13,7 +13,7 @@ const UserDropdown = ({ user }: { user: User }) => {
   const { mutate: signOut } = useSignOutMutation();
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-2xl hover:bg-sky-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">
+      <DropdownMenu.Trigger className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-2xl hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700">
         <HiUser />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

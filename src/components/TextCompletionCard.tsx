@@ -3,7 +3,6 @@ import { useCallback, useState } from "react";
 import {
   HiOutlineCheck,
   HiOutlineClipboard,
-  HiOutlineDocumentDuplicate,
   HiOutlineTrash,
 } from "react-icons/hi2";
 
@@ -25,7 +24,7 @@ const TextCompletionCard = ({
   }, [completion, copied]);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-100 bg-white from-white to-slate-50 p-4 shadow-md hover:border-slate-200 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 md:p-6">
+    <div className="overflow-hidden rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-800 dark:hover:bg-zinc-700/70 md:p-6">
       <p className="mb-2 text-sm font-light text-slate-500 dark:text-zinc-400">
         Generated{" "}
         {formatDistanceToNow(new Date(completion.createdAt), {

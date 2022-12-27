@@ -140,7 +140,7 @@ const Project: CustomNextPage = () => {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
       <div className="flex flex-1 flex-col">
-        <header className="flex h-12 w-full items-center border-b border-slate-100 px-4 dark:border-zinc-800">
+        <header className="flex h-12 w-full items-center border-b border-slate-200 px-4 dark:border-zinc-800">
           <input
             type="text"
             value={nameText}
@@ -163,7 +163,7 @@ const Project: CustomNextPage = () => {
           </div>
         </div>
       </div>
-      <div className="h-full w-px bg-slate-100 dark:bg-zinc-800 max-md:hidden" />
+      <div className="h-full w-px bg-slate-200 dark:bg-zinc-800 max-md:hidden" />
       <div className="flex h-full flex-1 overflow-hidden lg:max-w-[48rem]">
         <RemirrorEditor
           placeholder="Start typing here..."
@@ -258,7 +258,7 @@ const FormView = ({
                       name={input.id}
                       defaultValue={input.default_value}
                       type="text"
-                      className="mt-2 block w-full rounded-lg bg-transparent px-4 py-2.5 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 dark:ring-zinc-700"
+                      className="mt-2 block w-full rounded-lg bg-white px-4 py-2.5 shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-zinc-800"
                       placeholder={input.placeholder}
                       minLength={input.min_length}
                       maxLength={input.max_length}
@@ -279,7 +279,7 @@ const FormView = ({
                       id={input.id}
                       name={input.id}
                       defaultValue={input.default_value}
-                      className="mt-2 block w-full rounded-lg bg-transparent p-4 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 dark:ring-zinc-700"
+                      className="mt-2 block w-full rounded-lg bg-white p-4 shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-zinc-800"
                       placeholder={input.placeholder}
                       minLength={input.min_length}
                       maxLength={input.max_length}
@@ -296,7 +296,7 @@ const FormView = ({
 
         <button
           type="submit"
-          className="flex items-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm text-white hover:bg-slate-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+          className="flex items-center rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
         >
           {isGenerating ? "Generating" : "Generate Content"}
           <HiArrowRight className="ml-2 -mr-1 text-xl" />

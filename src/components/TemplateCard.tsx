@@ -15,7 +15,7 @@ const TemplateCard = ({
     <button
       onClick={() => onClick?.(templateId)}
       key={templateId}
-      className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-left shadow-md hover:shadow-lg dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600"
+      className="flex flex-col justify-start rounded-xl bg-white p-4 text-left shadow-sm hover:shadow-lg dark:border-none dark:bg-zinc-800 dark:shadow-none dark:hover:bg-zinc-700/70"
     >
       <span className="mb-2 inline-block text-3xl">
         <HiOutlineQuestionMarkCircle />

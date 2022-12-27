@@ -1,5 +1,6 @@
 import { supabaseClient } from "@/libs/supabaseClient";
 import { useMutation } from "@tanstack/react-query";
+import { RemirrorJSON } from "remirror";
 
 export const useUpdateProjectMutation = () => {
   return useMutation({
@@ -7,11 +8,12 @@ export const useUpdateProjectMutation = () => {
       projectId: string;
       userId: string;
       data: {
-        name?: string | null;
-        description?: string | null;
-        content?: any;
-        isFavorite?: boolean | null;
-        isDeleted?: boolean | null;
+        name?: string;
+        description?: string;
+        content?: RemirrorJSON;
+        isFavorite?: boolean;
+        isPinned?: boolean;
+        isDeleted?: boolean;
       };
     }) => {
       const { userId, projectId, data } = variables;
@@ -21,6 +23,9 @@ export const useUpdateProjectMutation = () => {
           name: data.name,
           content: data.content,
           description: data.description,
+          is_deleted: data.isDeleted,
+          is_favorite: data.isFavorite,
+          is_pinned: data.isPinned,
         })
         .match({
           id: projectId,

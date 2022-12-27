@@ -8,10 +8,10 @@ const ProjectLayout: FC<PropsWithChildren> = ({ children }) => {
     useTemplatesQuery();
   return (
     <DashboardLayout compactSidebar>
-      <aside className="absolute left-0 top-14 bottom-0 w-64 overflow-y-auto border-r border-slate-100 dark:border-zinc-800 lg:left-16">
-        <div className="p-4">
+      <aside className="absolute left-0 top-14 bottom-0 w-64 overflow-y-auto border-r border-slate-200 dark:border-zinc-800 lg:left-16">
+        <div className="p-2">
           <div className="mb-2">
-            <p className="text-xl font-semibold">Templates</p>
+            <p className="text-lg font-semibold">Templates</p>
           </div>
           <div className="space-y-2">
             {isTemplatesLoading ? (
