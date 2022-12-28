@@ -12,6 +12,7 @@ import {
   HiOutlineHome,
   HiOutlineSquares2X2,
   HiOutlineTrash,
+  HiOutlineChatBubbleOvalLeft,
 } from "react-icons/hi2";
 
 const DashboardLayout: FC<
@@ -37,10 +38,10 @@ const DashboardLayout: FC<
         icon: <HiOutlineSquares2X2 />,
       },
       {
-        id: "playground",
-        name: "Playground",
-        href: "/dashboard/playground",
-        icon: <HiOutlineCube />,
+        id: "chat",
+        name: "Chat",
+        href: "/dashboard/chat",
+        icon: <HiOutlineChatBubbleOvalLeft />,
       },
       {
         id: "trash",
