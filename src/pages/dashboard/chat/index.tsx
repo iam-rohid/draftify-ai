@@ -1,113 +1,82 @@
+import {
+  useCreateNewConversationMutation,
+  useGetConversationsList,
+} from "@/hooks/conversations";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { openai } from "@/libs/openai";
 import { useAuth } from "@/providers/AuthProvider";
 import { CustomNextPage } from "@/types/next";
-import clsx from "clsx";
-import { formatDistanceToNow } from "date-fns";
-import { FormEvent, useCallback, useEffect, useState } from "react";
-
-const BASE_PROMPT = `
-The following is a conversation with an AI assistant whose name is Salman Khan. Salman Khan is helpful, creative, clever, and very friendly.
-
-Human: Hello, who are you?
-AI: I am an AI created by Rohid. How can I help you today?
-`;
-
-type Conversasion = {
-  id: "Human" | "AI";
-  message: string;
-  createdAt: string;
-};
+import { useRouter } from "next/router";
+import { useCallback, useEffect } from "react";
 
 const Chat: CustomNextPage = () => {
-  const [conversasions, setConversasions] = useState<Conversasion[]>([]);
-
-  const [messageText, setMessageText] = useState("");
   const { user } = useAuth();
+  const {
+    mutate: createNewConversationMutate,
+    isLoading: isCreatingNewConversation,
+  } = useCreateNewConversationMutation();
+  const {
+    data: conversations,
+    isLoading,
+    isError,
+    error,
+  } = useGetConversationsList({
+    userId: user!.id,
+  });
 
-  const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      if (!user) return;
-      if (!messageText.trim()) return;
+  const router = useRouter();
 
-      const newConversations: Conversasion[] = [
-        ...conversasions,
-        {
-          id: "Human",
-          createdAt: new Date().toISOString(),
-          message: messageText,
+  const handleCreateConversation = useCallback(() => {
+    createNewConversationMutate(
+      {
+        settings: {
+          model: "text-davinci-003",
+          top_p: 1,
+          temperature: 0.9,
+          presence_penalty: 0.6,
+          best_of: 1,
+          stop: ["Human:", "AI:"],
+          max_tokens: 200,
         },
-      ];
-
-      setConversasions(newConversations);
-      setMessageText("");
-
-      const prompt =
-        BASE_PROMPT +
-        newConversations
-          .map((conversasion) => `${conversasion.id}: ${conversasion.message}`)
-          .join("\n") +
-        "AI: ";
-      console.log(prompt);
-
-      const { data } = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt,
-        top_p: 1,
-        temperature: 0.9,
-        presence_penalty: 0.6,
-        best_of: 1,
-        stop: ["Human:", "AI:"],
-        user: user.id,
-        max_tokens: 190,
-      });
-      console.log({ data });
-
-      const aiResponse = data.choices[0].text?.trim();
-
-      if (!aiResponse) {
-        return;
+      },
+      {
+        onSuccess: (conversation) => {
+          router.push(`/dashboard/chat/${conversation.id}`);
+        },
       }
-      setConversasions([
-        ...newConversations,
-        {
-          id: "AI",
-          createdAt: new Date().toISOString(),
-          message: aiResponse,
-        },
-      ]);
-    },
-    [conversasions, messageText, user]
-  );
+    );
+  }, [createNewConversationMutate, router]);
+
+  useEffect(() => {
+    if (conversations && conversations.length) {
+      router.push(`/dashboard/chat/${conversations[0].id}`);
+    }
+  }, [conversations, router]);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (isError) {
+    return (
+      <p>{error instanceof Error ? error.message : "Something went wrong!"}</p>
+    );
+  }
+
+  if (conversations && conversations.length) {
+    return <p>Redirecting....</p>;
+  }
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] w-full flex-col overflow-hidden">
-      <div className="flex-1  overflow-y-auto">
-        {conversasions.map((conversation, i) => (
-          <div
-            key={i}
-            className={clsx(
-              "p-4",
-              conversation.id === "AI" ? "text-green-500" : ""
-            )}
-          >
-            <p>{conversation.message}</p>
-            <p className="text-sm">
-              {formatDistanceToNow(new Date(conversation.createdAt))}
-            </p>
-          </div>
-        ))}
-      </div>
-      <form onSubmit={handleSubmit} className="sticky bottom-0">
-        <input
-          type="text"
-          value={messageText}
-          onChange={(e) => setMessageText(e.currentTarget.value)}
-          className="w-full px-4 py-2.5"
-          placeholder="Ask Salman khan something..."
-        />
-      </form>
+    <div className="flex min-h-[calc(100vh-3.5rem)] w-full flex-col items-center justify-center overflow-hidden text-center">
+      <p className="text-2xl font-bold">
+        You don&apos;t have any conversations
+      </p>
+      <button
+        className="mt-4 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
+        onClick={handleCreateConversation}
+      >
+        {isCreatingNewConversation ? "Creating..." : "Create New Conversation"}
+      </button>
     </div>
   );
 };

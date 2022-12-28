@@ -67,7 +67,10 @@ const DashboardLayout: FC<
       <Header user={user} />
       <Sidebar menu={mainMenu} compact={isCompactSidebar} />
       <main
-        className={clsx("mt-14", isCompactSidebar ? "lg:ml-16" : "lg:ml-64")}
+        className={clsx(
+          "relative mt-14",
+          isCompactSidebar ? "lg:ml-16" : "lg:ml-64"
+        )}
       >
         {children}
       </main>
@@ -128,17 +131,11 @@ const Sidebar = ({
   return (
     <aside
       className={clsx(
-        "fixed left-0 top-14 bottom-0 z-30 border-r border-slate-200 bg-slate-100 dark:border-zinc-800 dark:bg-zinc-900 max-lg:hidden",
+        "fixed left-0 top-14 bottom-0 z-30 flex flex-col overflow-hidden border-r border-slate-200 bg-slate-100 dark:border-zinc-800 dark:bg-zinc-900 max-lg:hidden",
         compact ? "w-16" : "w-64"
       )}
     >
-      <div
-        className={clsx(
-          compact
-            ? "my-4 flex flex-col items-center space-y-4"
-            : "my-6 space-y-6 px-4"
-        )}
-      >
+      <header className={compact ? "mx-auto py-4" : "p-4"}>
         <button
           className={clsx(
             "flex w-full items-center justify-center rounded-lg border border-slate-300 hover:border-slate-400 dark:border-zinc-700 dark:hover:border-zinc-400",
@@ -148,7 +145,15 @@ const Sidebar = ({
           <HiOutlinePlus className={compact ? "text-2xl" : "mr-2 text-xl"} />
           {!compact && "New Project"}
         </button>
+      </header>
 
+      <div
+        className={clsx(
+          compact
+            ? "flex flex-col items-center space-y-4 overflow-y-auto"
+            : "space-y-4 p-4"
+        )}
+      >
         <nav className="space-y-px">
           {menu.map((item) => (
             <Link
