@@ -7,10 +7,17 @@ import { openai } from "@/libs/openai";
 import { useAuth } from "@/providers/AuthProvider";
 import { CustomNextPage } from "@/types/next";
 import { useQueryClient } from "@tanstack/react-query";
-import clsx from "clsx";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { useRouter } from "next/router";
-import { useState, useCallback, FormEvent, useRef, useEffect } from "react";
+import {
+  useState,
+  useCallback,
+  FormEvent,
+  useRef,
+  useEffect,
+  Fragment,
+} from "react";
+import { HiOutlineUser } from "react-icons/hi2";
 
 const BASE_PROMPT = `
 The following is a conversation with an AI assistant who is created by Drafitfy and don't have any spacific name. The AI is very helpful, creative, clever, and very friendly. It provides answers with proper explanation.
@@ -36,7 +43,8 @@ const Conversation: CustomNextPage = () => {
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [messageText, setMessageText] = useState("");
   const scrollViewRef = useRef<HTMLDivElement>(null);
-
+  const textBoxRef = useRef<HTMLTextAreaElement>(null);
+  const [textBoxHeight, setTextBoxHeight] = useState(24);
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -145,8 +153,27 @@ const Conversation: CustomNextPage = () => {
     }
   }, [conversation?.messages.length, isAiTyping]);
 
+  useEffect(() => {
+    const handleInput = (event: Event) => {
+      const height = (event.currentTarget as HTMLTextAreaElement).scrollHeight;
+      console.log({ height });
+      setTextBoxHeight(height);
+    };
+    const element = textBoxRef.current;
+    element?.addEventListener("input", handleInput);
+    console.log({ element });
+
+    return () => {
+      element?.removeEventListener("input", handleInput);
+    };
+  }, [textBoxRef]);
+
   if (isLoading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex min-h-[calc(100vh-3.5rem)] w-full items-center justify-center">
+        <div className="box-jumping-loader"></div>
+      </div>
+    );
   }
 
   if (isError) {
@@ -157,50 +184,90 @@ const Conversation: CustomNextPage = () => {
 
   return (
     <div className="relative flex h-[calc(100vh-3.5rem)] flex-col overflow-hidden">
-      <div className="h-full w-full flex-1 overflow-y-auto" ref={scrollViewRef}>
-        <div className="mx-auto max-w-3xl px-4 md:px-6">
+      <div
+        className="flex flex-1 flex-col overflow-y-auto pb-6 md:pb-8"
+        ref={scrollViewRef}
+      >
+        <ul>
           {conversation.messages.map((message, i) => (
-            <div key={i} className="my-4">
-              <div
-                className={clsx(
-                  "mb-1 w-fit max-w-[80%] rounded-xl px-3.5 py-3 shadow-sm hover:shadow-lg",
-                  message.isAiResponse
-                    ? "mr-auto rounded-bl-none bg-white dark:bg-zinc-800"
-                    : "ml-auto rounded-br-none bg-indigo-500 text-right text-white"
-                )}
-              >
-                <a className="whitespace-pre-wrap">{message.text}</a>
-              </div>
-              <p
-                className={clsx(
-                  "text-sm text-slate-500 dark:text-zinc-400",
-                  message.isAiResponse ? "text-left" : "text-right"
-                )}
-              >
-                {formatDistanceToNow(new Date(message.createdAt), {
-                  addSuffix: true,
-                })}
-              </p>
-            </div>
+            <Fragment key={message.id}>
+              <li>
+                <div className="flex flex-row gap-4 px-4 py-2 hover:bg-slate-200 dark:hover:bg-zinc-800 md:px-6">
+                  <div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-300/70 dark:bg-zinc-700/70">
+                      {message.isAiResponse ? (
+                        <p className="uppercase">AI</p>
+                      ) : (
+                        <HiOutlineUser className="text-xl" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="mb-1 text-sm">
+                      <b>{message.isAiResponse ? "AI" : "You"}</b>
+                      <span className="ml-2 text-slate-500 dark:text-zinc-400">
+                        {format(
+                          new Date(message.createdAt),
+                          "MM/dd/yyyy h:mm b"
+                        )}
+                      </span>
+                    </p>
+                    <p className="whitespace-pre-wrap">{message.text}</p>
+                  </div>
+                </div>
+              </li>
+              {i < conversation.messages.length - 1 && (
+                <div className="px-4 py-4 md:px-6">
+                  <hr className="border-slate-200 opacity-50 dark:border-zinc-700"></hr>
+                </div>
+              )}
+            </Fragment>
           ))}
-          {isAiTyping && <WritingIndicator />}
-        </div>
+
+          {isAiTyping && (
+            <div>
+              <div className="px-4 py-4 md:px-6">
+                <hr className="border-slate-200 opacity-50 dark:border-zinc-700"></hr>
+              </div>
+
+              <li>
+                <div className="flex flex-row gap-4 px-4 py-2 hover:bg-slate-200 dark:hover:bg-zinc-800 md:px-6">
+                  <div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-300/70 dark:bg-zinc-700/70">
+                      <p className="text-lg font-bold uppercase">AI</p>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="mb-1 text-sm">
+                      <b>AI</b>
+                      <span className="ml-2 text-slate-500 dark:text-zinc-400">
+                        Typing...
+                      </span>
+                    </p>
+                    <p className="animate-pulse whitespace-pre-wrap">•••</p>
+                  </div>
+                </div>
+              </li>
+            </div>
+          )}
+        </ul>
       </div>
-      <footer className="h-fit bg-slate-100 dark:bg-zinc-900">
-        <div className="mx-auto h-full w-full max-w-4xl px-4 pb-4 md:px-6 md:pb-6">
-          <div className=" h-14 overflow-hidden rounded-xl bg-white shadow-xl dark:bg-zinc-800">
-            <form onSubmit={handleSubmit} className="h-full">
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.currentTarget.value)}
-                className="h-full w-full bg-transparent px-6 py-2.5 outline-none"
-                placeholder="How can I help you?..."
-              />
-            </form>
-          </div>
-        </div>
-      </footer>
+      <form
+        onSubmit={handleSubmit}
+        className="-mt-2 h-fit px-4 pb-4 md:px-6 md:pb-6"
+      >
+        <input
+          type="text"
+          value={messageText}
+          onChange={(e) => setMessageText(e.currentTarget.value)}
+          className="max-h-32 w-full resize-none rounded-lg bg-white px-6 py-3 outline-none dark:bg-zinc-800"
+          placeholder="How can I help you?..."
+          autoFocus
+          style={{
+            height: textBoxHeight + 24,
+          }}
+        />
+      </form>
     </div>
   );
 };

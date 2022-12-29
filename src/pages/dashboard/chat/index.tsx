@@ -16,6 +16,7 @@ const Chat: CustomNextPage = () => {
   } = useCreateNewConversationMutation();
   const {
     data: conversations,
+    isSuccess: conversationsLoaded,
     isLoading,
     isError,
     error,
@@ -47,13 +48,21 @@ const Chat: CustomNextPage = () => {
   }, [createNewConversationMutate, router]);
 
   useEffect(() => {
-    if (conversations && conversations.length) {
-      router.push(`/dashboard/chat/${conversations[0].id}`);
+    if (conversations != undefined) {
+      if (conversations.length) {
+        router.push(`/dashboard/chat/${conversations[0].id}`);
+      } else {
+        handleCreateConversation();
+      }
     }
-  }, [conversations, router]);
+  }, [conversations, handleCreateConversation, router]);
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex min-h-[calc(100vh-3.5rem)] w-full items-center justify-center">
+        <div className="box-jumping-loader"></div>
+      </div>
+    );
   }
 
   if (isError) {
@@ -63,7 +72,11 @@ const Chat: CustomNextPage = () => {
   }
 
   if (conversations && conversations.length) {
-    return <p>Redirecting....</p>;
+    return (
+      <div className="flex min-h-[calc(100vh-3.5rem)] w-full items-center justify-center">
+        <div className="box-jumping-loader"></div>
+      </div>
+    );
   }
 
   return (
